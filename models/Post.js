@@ -3,7 +3,6 @@ const sequelize = require('../config/connection');
 
 class Post extends Model {}
 
-// define table columns and their types
 Post.init(
     {
         id: {
@@ -26,7 +25,7 @@ Post.init(
         },
         user_id: {
             type: DataTypes.INTEGER,
-            references: {
+            reference: {
                 model: 'user',
                 key: 'id',
             },
@@ -34,8 +33,8 @@ Post.init(
     },
     {
         sequelize,
-        timestamps: false,
         freezeTableName: true,
+        timeStamps: true,
         underscored: true,
         modelName: 'post',
     }
