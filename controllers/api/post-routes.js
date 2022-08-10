@@ -1,9 +1,8 @@
 const router = require('express').Router();
-const { User, Post, Comment } = require('../models');
+const { Post, User, Comment } = require('../../models');
 const withAuth = require('../../utils/auth');
 
-// get all users
-router.get('/', withAuth, (req, res) => {
+router.get('/', (req, res) => {
     Post.findAll({
         attributes: ['id', 'post_text', 'title', 'created_at'],
         include: [
@@ -34,8 +33,7 @@ router.get('/', withAuth, (req, res) => {
         });
 });
 
-// get one user
-router.get('/:id', withAuth, (req, res) => {
+router.get('/:id', (req, res) => {
     Post.findOne({
         where: {
             id: req.params.id,

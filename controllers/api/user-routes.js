@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const User = require('../models/User');
+const { User, Post, Comment } = require('../../models');
 
 // get all users
 router.get('/', (req, res) => {
@@ -13,7 +13,6 @@ router.get('/', (req, res) => {
         });
 });
 
-// get one user
 router.get('/:id', (req, res) => {
     User.findOne({
         attributes: { exclude: ['password'] },
@@ -30,7 +29,7 @@ router.get('/:id', (req, res) => {
                 attributes: ['id', 'comment_text', 'created_at'],
                 include: {
                     model: Post,
-                    attributes: ['id', 'title', 'post_text', 'created_at'],
+                    attributes: ['title', 'post_id'],
                 },
             },
         ],
@@ -48,10 +47,10 @@ router.get('/:id', (req, res) => {
         });
 });
 
-// create a new user
 router.post('/', (req, res) => {
     User.create({
         username: req.body.username,
+        // email: req.body.email,
         password: req.body.password,
     })
         .then(dbUserData => {
@@ -59,6 +58,7 @@ router.post('/', (req, res) => {
                 req.session.user_id = dbUserData.id;
                 req.session.username = dbUserData.username;
                 req.session.loggedIn = true;
+
                 res.json(dbUserData);
             });
         })
@@ -68,7 +68,6 @@ router.post('/', (req, res) => {
         });
 });
 
-// login a user
 router.post('/login', (req, res) => {
     User.findOne({
         where: {
@@ -76,27 +75,37 @@ router.post('/login', (req, res) => {
         },
     }).then(dbUserData => {
         if (!dbUserData) {
-            res.status(400).json({ message: 'No user with that username' });
+            res.status(400).json({ message: 'No user with that username!' });
             return;
         }
+
         const validPassword = dbUserData.checkPassword(req.body.password);
+
         if (!validPassword) {
-            res.status(400).json({ message: 'Incorrect password' });
+            res.status(400).json({ message: 'Incorrect password!' });
             return;
         }
+
         req.session.save(() => {
             req.session.user_id = dbUserData.id;
             req.session.username = dbUserData.username;
             req.session.loggedIn = true;
-            res.json({ user: dbUserData, message: 'You are now logged in' });
+
+            res.json({ user: dbUserData, message: 'You are now logged in!' });
         });
     });
 });
 
-// logout a user
-router.post('/logout', (req, res) => {});
+router.post('/logout', (req, res) => {
+    if (req.session.loggedIn) {
+        req.session.destroy(() => {
+            res.status(204).end();
+        });
+    } else {
+        res.status(404).end();
+    }
+});
 
-// update a user
 router.put('/:id', (req, res) => {
     User.update(req.body, {
         individualHooks: true,
@@ -117,7 +126,6 @@ router.put('/:id', (req, res) => {
         });
 });
 
-// delete a user
 router.delete('/:id', (req, res) => {
     User.destroy({
         where: {

@@ -11,5 +11,4 @@ async function logout() {
     }
 }
 
-// listen for the form submit event
 document.querySelector('#logout').addEventListener('click', logout);

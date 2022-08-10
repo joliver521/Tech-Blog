@@ -1,11 +1,9 @@
 async function loginFormHandler(event) {
     event.preventDefault();
 
-    // Get the form data
     const username = document.querySelector('#username-login').value.trim();
     const password = document.querySelector('#password-login').value.trim();
 
-    // Check if the form data is valid
     if (username && password) {
         const response = await fetch('/api/users/login', {
             method: 'post',
@@ -24,7 +22,6 @@ async function loginFormHandler(event) {
     }
 }
 
-// listen for the form submit event
 document
     .querySelector('.login-form')
     .addEventListener('submit', loginFormHandler);
